@@ -1,0 +1,131 @@
+{
+  "_comment": "Azure NSG Baseline Security Rules — Production Template",
+  "_description": "Default-deny inbound, least-privilege outbound. Adjust source IPs before deploying.",
+
+  "nsg_name": "nsg-baseline-prod",
+  "location": "eastus",
+
+  "inbound_rules": [
+    {
+      "name": "Deny-All-Inbound-Default",
+      "priority": 4096,
+      "protocol": "*",
+      "source_address_prefix": "*",
+      "source_port_range": "*",
+      "destination_address_prefix": "*",
+      "destination_port_range": "*",
+      "access": "Deny",
+      "direction": "Inbound",
+      "_note": "Explicit deny-all — already default in Azure but made visible here"
+    },
+    {
+      "name": "Allow-HTTPS-Inbound",
+      "priority": 100,
+      "protocol": "TCP",
+      "source_address_prefix": "Internet",
+      "source_port_range": "*",
+      "destination_address_prefix": "VirtualNetwork",
+      "destination_port_range": "443",
+      "access": "Allow",
+      "direction": "Inbound",
+      "_note": "HTTPS only — for web-facing tiers"
+    },
+    {
+      "name": "Allow-RDP-from-JumpHost",
+      "priority": 200,
+      "protocol": "TCP",
+      "source_address_prefix": "<jump-host-private-ip>/32",
+      "source_port_range": "*",
+      "destination_address_prefix": "VirtualNetwork",
+      "destination_port_range": "3389",
+      "access": "Allow",
+      "direction": "Inbound",
+      "_note": "RDP allowed ONLY from designated Jump Host IP — never from Internet"
+    },
+    {
+      "name": "Allow-SSH-from-JumpHost",
+      "priority": 210,
+      "protocol": "TCP",
+      "source_address_prefix": "<jump-host-private-ip>/32",
+      "source_port_range": "*",
+      "destination_address_prefix": "VirtualNetwork",
+      "destination_port_range": "22",
+      "access": "Allow",
+      "direction": "Inbound",
+      "_note": "SSH allowed ONLY from Jump Host — never open to Internet"
+    },
+    {
+      "name": "Allow-AzureMonitor-Inbound",
+      "priority": 300,
+      "protocol": "*",
+      "source_address_prefix": "AzureMonitor",
+      "source_port_range": "*",
+      "destination_address_prefix": "*",
+      "destination_port_range": "*",
+      "access": "Allow",
+      "direction": "Inbound",
+      "_note": "Required for Azure Monitor health probes"
+    },
+    {
+      "name": "Allow-LoadBalancer-Inbound",
+      "priority": 310,
+      "protocol": "*",
+      "source_address_prefix": "AzureLoadBalancer",
+      "source_port_range": "*",
+      "destination_address_prefix": "*",
+      "destination_port_range": "*",
+      "access": "Allow",
+      "direction": "Inbound"
+    }
+  ],
+
+  "outbound_rules": [
+    {
+      "name": "Allow-Azure-Services-Outbound",
+      "priority": 100,
+      "protocol": "TCP",
+      "source_address_prefix": "VirtualNetwork",
+      "source_port_range": "*",
+      "destination_address_prefix": "AzureCloud",
+      "destination_port_range": "443",
+      "access": "Allow",
+      "direction": "Outbound",
+      "_note": "Allow Azure PaaS service communication"
+    },
+    {
+      "name": "Allow-DNS-Outbound",
+      "priority": 110,
+      "protocol": "UDP",
+      "source_address_prefix": "VirtualNetwork",
+      "source_port_range": "*",
+      "destination_address_prefix": "*",
+      "destination_port_range": "53",
+      "access": "Allow",
+      "direction": "Outbound"
+    },
+    {
+      "name": "Allow-HTTPS-Outbound",
+      "priority": 120,
+      "protocol": "TCP",
+      "source_address_prefix": "VirtualNetwork",
+      "source_port_range": "*",
+      "destination_address_prefix": "Internet",
+      "destination_port_range": "443",
+      "access": "Allow",
+      "direction": "Outbound",
+      "_note": "Allow outbound HTTPS for updates and cloud connectivity"
+    },
+    {
+      "name": "Deny-All-Outbound-Default",
+      "priority": 4096,
+      "protocol": "*",
+      "source_address_prefix": "*",
+      "source_port_range": "*",
+      "destination_address_prefix": "*",
+      "destination_port_range": "*",
+      "access": "Deny",
+      "direction": "Outbound",
+      "_note": "Default deny-all outbound — all allowed traffic must be explicitly listed above"
+    }
+  ]
+}

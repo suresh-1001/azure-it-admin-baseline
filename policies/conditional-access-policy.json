@@ -1,0 +1,94 @@
+{
+  "_comment": "Azure AD Conditional Access — MFA Baseline Policy Template",
+  "_description": "Requires MFA for all users except break-glass accounts. Blocks legacy auth.",
+  "_reference": "https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/",
+
+  "policies": [
+    {
+      "displayName": "CA001 - Require MFA for All Users",
+      "state": "enabled",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeUsers": [],
+          "excludeGroups": ["<break-glass-group-id>"]
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["mfa"]
+      }
+    },
+    {
+      "displayName": "CA002 - Block Legacy Authentication",
+      "state": "enabled",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeGroups": ["<break-glass-group-id>"]
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "clientAppTypes": [
+          "exchangeActiveSync",
+          "other"
+        ]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["block"]
+      }
+    },
+    {
+      "displayName": "CA003 - Require Compliant Device for Corporate Apps",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeGroups": ["<break-glass-group-id>"]
+        },
+        "applications": {
+          "includeApplications": [
+            "00000002-0000-0ff1-ce00-000000000000",
+            "00000003-0000-0ff1-ce00-000000000000"
+          ],
+          "_comment": "Exchange Online + SharePoint Online app IDs"
+        },
+        "platforms": {
+          "includePlatforms": ["windows", "macOS"]
+        }
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["compliantDevice"]
+      }
+    },
+    {
+      "displayName": "CA004 - Block Sign-In from Risky Locations",
+      "state": "enabled",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeGroups": ["<break-glass-group-id>"]
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "locations": {
+          "includeLocations": ["All"],
+          "excludeLocations": ["<named-location-id-trusted-offices>"]
+        },
+        "signInRiskLevels": ["high", "medium"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["block"]
+      }
+    }
+  ]
+}
